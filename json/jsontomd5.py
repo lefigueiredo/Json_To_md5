@@ -54,9 +54,22 @@ def achar_bancos(bancos: list, linha: str):
     :return: Retorna a sigla do banco
     """
     for banco in bancos:
-        banco += "."
+        banco = " " + banco + "."
         if banco in linha:
-            return banco.replace(".", "")
+            return banco.replace(".", "").strip()
+
+
+def arrumar_banco(lista: list):
+    """
+    Retira as strings repetidas dos bancos de cada dict
+    :param lista: Lista de acessos
+    :return: Retorna a lista de acessos sem os brancos repetidos
+    """
+    for dict in lista:
+        for banco in dict["BANCO"]:
+            if dict["BANCO"].count(banco) > 1:
+                dict["BANCO"].remove(banco)
+    return lista
 
 
 bancos_existentes = ['AL', 'ANA', 'ANAC', 'ANATEL', 'ANEEL', 'ANP', 'ANS',
@@ -71,45 +84,44 @@ bancos_existentes = ['AL', 'ANA', 'ANAC', 'ANATEL', 'ANEEL', 'ANP', 'ANS',
 lista_md5 = []
 lista_acessos = []
 dados_json = ler_json('log')
-teste = []
 
 # Manipulação do JSON para NETWORK
 for chave, valor in dados_json.items():
     if chave == 'log':
-        while True:
-            for i in range(len(valor)):
-                string_md5 = (hashlib.md5(valor[i].encode())).hexdigest()
-                '''Cria o md5 de todas as linha do JSON. ".encode()" cria o 
-                md5 e o "hexdigest" converte para string hexadecimal'''
+        for i in range(len(valor)):
+            string_md5 = (hashlib.md5(valor[i].encode())).hexdigest()
+            '''Cria o md5 de todas as linha do JSON. ".encode()" cria o 
+            md5 e o "hexdigest" converte para string hexadecimal'''
 
-                if string_md5 in lista_md5:
-                    continue
-                else:
-                    lista_md5.append(string_md5)
-                    if "NETWORK" in valor[i]:
-                        dict_network = cria_dict(valor[i])
-                        # Cria o dict de todos os NETWORKs
+            if string_md5 in lista_md5:
+                continue
+            else:
+                lista_md5.append(string_md5)
+                if "NETWORK" in valor[i]:
+                    dict_network = cria_dict(valor[i])
+                    # Cria o dict de todos os NETWORKs
 
-                        if dict_network is not None:
-                            lista_acessos.append(cria_dict(valor[i]))
-                            # Adiciona na lista somente os dict com dados
-                            # TIRAR OS NETWORKS REPITIDOS
-            break
+                    if dict_network is not None:
+                        lista_acessos.append(cria_dict(valor[i]))
+                        # Adiciona na lista somente os dict com dados
+                        # TIRAR OS NETWORKS REPITIDOS
 
-# Manipulação do JSON para uso de ID
+
+# Manipulação do JSON procurando pelo ID
 for chave, valor in dados_json.items():
     if chave == 'log':
-        while True:
-            for ids in lista_acessos:
-                for i in range(len(valor)):
-                    if ids["ID"] in valor[i]:
-                        if valor[i] in lista_acessos:
-                            teste.append(ids["ID"] )
-            break
+        for ids in lista_acessos:
+            for linha in range(len(valor)):
+                if ids["ID"] in valor[linha]:
+                    if achar_bancos(bancos_existentes, valor[linha]) is not None:
+                    # Chama função  que procura o banco na linha
+                        ids["BANCO"].append(achar_bancos(bancos_existentes, valor[linha]))
+                        # Se retornar um valor, add ele no dict do NETWORK
 
+# Manipulação da lista de bancos dos NETWORKs
+arrumar_banco(lista_acessos)
 
-print(lista_md5)
-for i in lista_acessos:
+print(lista_md5)    # Teste print lista md5
+for i in lista_acessos:     # Teste print lista acessos
     print(i, end="\n")
-print(len(lista_acessos))
-print(teste)
+print(len(lista_acessos))   # Teste print qtdd de itens NETWORK
