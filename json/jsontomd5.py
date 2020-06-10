@@ -16,7 +16,7 @@ def ler_json(file_name: str):
 
 def cria_dict(linha: str):
     dicionario = {
-        'ID': linha[linha.find("conn")+4: linha.find("]")],
+        'ID': linha[linha.find("conn") + 4: linha.find("]")],
         'DATA': linha[:10],
         'HORA': linha[11:19],
         'BANCO': "",
@@ -25,7 +25,11 @@ def cria_dict(linha: str):
     }
 
     if "metadata from" in linha:
-        dicionario['IP'] = linha[linha.find("metadata from")+14: linha.find(":")]
+        dicionario['IP'] = linha[linha.find("from") + 5: linha.find(":", 20, 150)]
+
+    elif "end connection" in linha:
+        dicionario['IP'] = linha[linha.find("connection") + 11: linha.find(":", 20, 100)]
+
 
     # Tratamento dos itens da lista de acessos
     if dicionario['ID'] != "":
