@@ -24,13 +24,14 @@ def cria_dict(linha: str):
     dicionario['IP'] = ""
     dicionario['AMDHM'] = linha[:16].replace("-","").replace(":","").replace("T","")
 
+    if "metadata from" in linha:
+        dicionario['IP'] = linha[linha.find("metadata from")+14:linha.find("]")]
 
 
 
-
-
+    # Tratamento dos itens da lista de acessos
     if dicionario['ID'] != "":
-        # Se ID = Nulo, significa que NETWORK não possuí [conn#####]
+        # Se ID = None, significa que NETWORK não possuí [conn#####]
         return dicionario
     else:
         del dicionario
