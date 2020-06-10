@@ -15,6 +15,11 @@ def ler_json(file_name: str):
 
 
 def cria_dict(linha: str):
+    """
+    Cria o dicionário individual para cada acesso em NETWORK
+    :param linha: Linha do Json que está sendo lido
+    :return: Retorna o dicionário do acesso
+    """
     dicionario = {
         'ID': linha[linha.find("conn") + 4: linha.find("]")],
         'DATA': linha[:10],
@@ -24,14 +29,16 @@ def cria_dict(linha: str):
         'AMDHM': linha[:16].replace("-", "").replace(":", "").replace("T", "")
     }
 
-    if "metadata from" in linha:
+    # =~=~= Identificação do IP
+    if "metadata from" in linha:    # NETWORKs tipo 1
         dicionario['IP'] = linha[linha.find("from") + 5: linha.find(":", 20, 150)]
+        # Procura o valor no intervalo que vai de "from" até o primeiro ":"
 
-    elif "end connection" in linha:
+    elif "end connection" in linha:    # NETWORKs tipo 2
         dicionario['IP'] = linha[linha.find("connection") + 11: linha.find(":", 20, 100)]
+        # Procura o valor no intervalo que vai de "connection" até o primeiro ":"
 
-
-    # Tratamento dos itens da lista de acessos
+    # =~=~= Tratamento dos itens da lista de acessos
     if dicionario['ID'] != "":
         # Se ID = None, significa que NETWORK não possuí [conn#####]
         return dicionario
